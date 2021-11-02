@@ -52,11 +52,10 @@ ratslam::LocalViewScene *lvs = NULL;
 bool use_graphics;
 #endif
 
-
 using namespace ratslam;
-ratslam::LocalViewMatch * lv = NULL;
+ratslam::LocalViewMatch *lv = NULL;
 
-void image_callback(sensor_msgs::ImageConstPtr image, ros::Publisher * pub_vt)
+void image_callback(sensor_msgs::ImageConstPtr image, ros::Publisher *pub_vt)
 {
   ROS_DEBUG_STREAM("LV:image_callback{" << ros::Time::now() << "} seq=" << image->header.seq);
 
@@ -79,8 +78,10 @@ void image_callback(sensor_msgs::ImageConstPtr image, ros::Publisher * pub_vt)
 #endif
 }
 
-int main(int argc, char * argv[])
+int main(int argc, char *argv[])
 {
+
+  //输出一些无聊的信息
   ROS_INFO_STREAM(argv[0] << " - openRatSLAM Copyright (C) 2012 David Ball and Scott Heath");
   ROS_INFO_STREAM("RatSLAM algorithm by Michael Milford and Gordon Wyeth");
   ROS_INFO_STREAM("Distributed under the GNU GPL v3, see the included license file.");
@@ -96,7 +97,7 @@ int main(int argc, char * argv[])
   read_ini(argv[1], settings);
 
   get_setting_child(general_settings, settings, "general", true);
-  get_setting_from_ptree(topic_root, general_settings, "topic_root", (std::string)"");
+  get_setting_from_ptree(topic_root, general_settings, "topic_root", (std::string) "");
   get_setting_child(ratslam_settings, settings, "ratslam", true);
   lv = new ratslam::LocalViewMatch(ratslam_settings);
 
@@ -111,13 +112,12 @@ int main(int argc, char * argv[])
   image_transport::ImageTransport it(node);
   image_transport::Subscriber sub = it.subscribe(topic_root + "/camera/image", 0, boost::bind(image_callback, _1, &pub_vt));
 
-
 #ifdef HAVE_IRRLICHT
-    boost::property_tree::ptree draw_settings;
-    get_setting_child(draw_settings, settings, "draw", true);
-    get_setting_from_ptree(use_graphics, draw_settings, "enable", true);
-    if (use_graphics)
-      lvs = new ratslam::LocalViewScene(draw_settings, lv);
+  boost::property_tree::ptree draw_settings;
+  get_setting_child(draw_settings, settings, "draw", true);
+  get_setting_from_ptree(use_graphics, draw_settings, "enable", true);
+  if (use_graphics)
+    lvs = new ratslam::LocalViewScene(draw_settings, lv);
 #endif
 
   ros::spin();

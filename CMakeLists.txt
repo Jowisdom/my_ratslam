@@ -14,7 +14,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 find_package(Boost REQUIRED COMPONENTS serialization)
 find_package(Irrlicht REQUIRED)
 find_package(OpenGL REQUIRED)
-
+find_package(Threads REQUIRED)
 message(${OpenCV_LIBRARIES})
 
 ## Generate messages in the 'msg' folder
