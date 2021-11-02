@@ -43,8 +43,6 @@ using namespace std;
 namespace ratslam
 {
 
-
-
 LocalViewMatch::LocalViewMatch(ptree settings)
 {
   get_setting_from_ptree(VT_MIN_PATCH_NORMALISATION_STD, settings, "vt_min_patch_normalisation_std", (double)0);
@@ -64,7 +62,7 @@ LocalViewMatch::LocalViewMatch(ptree settings)
 
   TEMPLATE_SIZE = TEMPLATE_X_SIZE * TEMPLATE_Y_SIZE;
 
-  templates.reserve(10000);
+  templates.reserve(10000);//预分配指定大小的空间
 
   current_view.resize(TEMPLATE_SIZE);
 
