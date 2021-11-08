@@ -76,6 +76,13 @@ LocalViewMatch::~LocalViewMatch()
 
 }
 
+
+/*input: a view_rgb image, greyscale, image_width, image_height
+ *
+ *
+ * */
+
+
 void LocalViewMatch::on_image(const unsigned char *view_rgb, bool greyscale, unsigned int image_width, unsigned int image_height)
 {
   if (view_rgb == NULL)
@@ -92,9 +99,11 @@ void LocalViewMatch::on_image(const unsigned char *view_rgb, bool greyscale, uns
   this->view_rgb = view_rgb;
   this->greyscale = greyscale;
 
-  convert_view_to_view_template(greyscale);
+  convert_view_to_view_template(greyscale); //1、转化为view_template
   prev_vt = get_current_vt();
   unsigned int vt_match_id;
+
+  //2、与存储的所有的template进行比较，如何小于阈值，则
   compare(vt_error, vt_match_id);
   if (vt_error <= VT_MATCH_THRESHOLD)
   {
