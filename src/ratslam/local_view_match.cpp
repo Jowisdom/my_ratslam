@@ -104,9 +104,9 @@ namespace ratslam {
         unsigned int vt_match_id;
 
         //2、与存储的所有的template进行比较，
-        // 如何小于阈值，
-        // 如果大于阈值，则将该view_template存储到template
-        compare(vt_error, vt_match_id);
+        // 如果匹配误差vt_match_id小于阈值，激活current_vt
+        // 如果匹配误差vt_match_id大于阈值，则将该view_template存储到template，并令pre_vt=current_vt
+        compare(vt_error, vt_match_id); //返回匹配到的模板vt_match_id和匹配误差vt_error
         if (vt_error <= VT_MATCH_THRESHOLD) {
             set_current_vt((int) vt_match_id);
             cout << "VTM[" << setw(4) << get_current_vt() << "] " << endl;
@@ -133,17 +133,30 @@ namespace ratslam {
 
     }
 
+/* void LocalViewMatch::convert_view_to_view_template(bool grayscale)函数功能
+ * 将rgb图像转为current_view模板:
+ * 1、将原图片池化为指定大小的模板current_view，彩色图片顺带转为灰度图
+ * 2、将current_view进行 global normalization和 path normalizaiton
+ * 3、计算current_view的均值current_mean
+ * */
     void LocalViewMatch::convert_view_to_view_template(bool grayscale) {
         int data_next = 0;
+        //图片大小
         int sub_range_x = IMAGE_VT_X_RANGE_MAX - IMAGE_VT_X_RANGE_MIN;
         int sub_range_y = IMAGE_VT_Y_RANGE_MAX - IMAGE_VT_Y_RANGE_MIN;
+        //每个要池化的block的大小
+        //template_size为模板个数,也是block的个数，每个池化后的block都是template的一个像素
         int x_block_size = sub_range_x / TEMPLATE_X_SIZE;
         int y_block_size = sub_range_y / TEMPLATE_Y_SIZE;
         int pos;
 
         for (unsigned int i; i < current_view.size(); i++)
             current_view[i] = 0;
-
+        //--------------------------------------------------------------------------------------------------------------
+        //池化为模板大小
+        //判断图片是否为灰度图：
+        //      if 是：池化后保存到current_view
+        //      if not:将所有像素的RGB值进行累加转化为灰度图，池化后保存到current_view
         if (grayscale) {
             for (int y_block = IMAGE_VT_Y_RANGE_MIN, y_block_count = 0; y_block_count < TEMPLATE_Y_SIZE; y_block +=
                                                                                                                  y_block_size, y_block_count++) {
@@ -165,13 +178,17 @@ namespace ratslam {
                                                                                                                  y_block_size, y_block_count++) {
                 for (int x_block = IMAGE_VT_X_RANGE_MIN, x_block_count = 0; x_block_count < TEMPLATE_X_SIZE; x_block +=
                                                                                                                      x_block_size, x_block_count++) {
+                    // block中像素累加，池化，block_size表示池化核的size
                     for (int x = x_block; x < (x_block + x_block_size); x++) {
                         for (int y = y_block; y < (y_block + y_block_size); y++) {
+                            //计算在block中的像素在原图片中的坐标，view_rgb为按一维矩阵排列，所以（x,y) = (x + y * IMAGE_WIDTH) * 3
                             pos = (x + y * IMAGE_WIDTH) * 3;
+                            //将RGB像素值累加并保存到current_view到转为灰度图
                             current_view[data_next] += ((double) (view_rgb[pos]) + (double) (view_rgb[pos + 1])
                                                         + (double) (view_rgb[pos + 2]));
                         }
                     }
+                    //全局平均
                     current_view[data_next] /= (255.0 * 3.0);
                     current_view[data_next] /= (x_block_size * y_block_size);
 
@@ -179,7 +196,7 @@ namespace ratslam {
                 }
             }
         }
-
+        //--------------------------------------------------------------------------------------------------------------
         if (VT_NORMALISATION > 0) {
             double avg_value = 0;
 
@@ -188,7 +205,7 @@ namespace ratslam {
             }
 
             avg_value /= current_view.size();
-
+            //将current_view像素值均放置于【0，1】之间
             for (unsigned int i = 0; i < current_view.size(); i++) {
                 current_view[i] = std::max(0.0, std::min(current_view[i] * VT_NORMALISATION / avg_value, 1.0));
             }
@@ -212,6 +229,7 @@ namespace ratslam {
                 current_view_copy[i] = current_view[i];
 
             // this code could be significantly optimimised ....
+            // patch normalisation
             for (int x = 0; x < TEMPLATE_X_SIZE; x++) {
                 for (int y = 0; y < TEMPLATE_Y_SIZE; y++) {
                     patch_sum = 0;
@@ -283,6 +301,7 @@ namespace ratslam {
 // slen pixel shifts in each direction
 // returns the matching template and the MSE
     void LocalViewMatch::compare(double &vt_err, unsigned int &vt_match_id) {
+        //如果没有模板，则返回
         if (templates.size() == 0) {
             vt_err = DBL_MAX;
             vt_error = vt_err;
@@ -314,7 +333,7 @@ namespace ratslam {
         if (VT_PANORAMIC) {
 
             BOOST_FOREACH(vt, templates) {
-
+                            //如果当前current_tempate的模板的均值与匹配的模板的均值相差太大，则认为其不匹配；
                             if (abs(current_mean - vt.mean) > VT_MATCH_THRESHOLD + epsilon)
                                 continue;
 

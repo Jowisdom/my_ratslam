@@ -1020,9 +1020,15 @@ void PosecellNetwork::create_view_template()
 
 }
 
+
+/*input:
+ *      vt: 当前激活的local view cell id,即current_id,也就是LV节点发布的消息内容
+ *      vt_rad: relative_rad
+ *      */
 void PosecellNetwork::on_view_template(unsigned int vt, double vt_rad)
 {
   PosecellVisualTemplate * pcvt;
+  // 如果输入一个new template, 则新建一个PoseCell
   if (vt >= visual_templates.size())
   {
     // must be a new template

@@ -67,8 +67,8 @@ void image_callback(sensor_msgs::ImageConstPtr image, ros::Publisher *pub_vt) {
 
     vt_output.header.stamp = ros::Time::now();
     vt_output.header.seq++;
-    vt_output.current_id = lv->get_current_vt();
-    vt_output.relative_rad = lv->get_relative_rad();
+    vt_output.current_id = lv->get_current_vt(); //得到当前激活的模板id
+    vt_output.relative_rad = lv->get_relative_rad(); //得到模板对应的角度
 
     pub_vt->publish(vt_output);
 
