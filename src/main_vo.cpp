@@ -96,6 +96,8 @@ int main(int argc, char * argv[])
   pub_vo = node.advertise<nav_msgs::Odometry>(topic_root + "/odom", 0);
 
   image_transport::ImageTransport it(node);
+  //订阅相机图像
+  //回调函数只需要指定函数名称即可
   image_transport::Subscriber sub = it.subscribe(topic_root + "/camera/image", 1, image_callback);
 
   ros::spin();

@@ -127,8 +127,10 @@ int main(int argc, char *argv[]) {
     }
     ros::NodeHandle node;
 
-
+    //建立PoseCellNetwork
     ratslam::PosecellNetwork *pc = new ratslam::PosecellNetwork(ratslam_settings);
+
+
     ros::Publisher pub_pc = node.advertise<ratslam_ros::TopologicalAction>(topic_root + "/PoseCell/TopologicalAction",
                                                                            0);
 

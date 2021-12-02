@@ -80,9 +80,9 @@ void PosecellNetwork::pose_cell_builder()
 
   PC_C_SIZE_TH = (2.0 * M_PI) / PC_DIM_TH;
 
-  // set the sizes
+  // set the sizes, in here Posecell is a double type
   posecells_memory_size = sizeof(Posecell) * PC_DIM_XY * PC_DIM_XY * PC_DIM_TH;
-  posecells_elements = PC_DIM_XY * PC_DIM_XY * PC_DIM_TH;
+  posecells_elements = PC_DIM_XY * PC_DIM_XY * PC_DIM_TH; //元素个数
 
   // allocate the memory
   posecells_memory = (Posecell *)malloc((size_t)posecells_memory_size);
@@ -574,6 +574,7 @@ double PosecellNetwork::find_best()
   }
 
   //  % take the max activated cell +- AVG_CELL in 3d space
+  //  在一个3d范围内求三个分量的和
   //  % get the sums for each axis
   memset(pca_new_memory, 0, posecells_memory_size);
 
@@ -604,6 +605,7 @@ double PosecellNetwork::find_best()
   sum_y2 = 0;
   for (i = 0; i < PC_DIM_XY; i++)
   {
+      //三角函数分布
     sum_x1 += PC_XY_SUM_SIN_LOOKUP[i] * x_sums[i];
     sum_x2 += PC_XY_SUM_COS_LOOKUP[i] * x_sums[i];
     sum_y1 += PC_XY_SUM_SIN_LOOKUP[i] * y_sums[i];
@@ -1004,7 +1006,7 @@ void PosecellNetwork::on_odo(double vtrans, double vrot, double time_diff_s)
   global_inhibit();
   normalise();
   path_integration(vtrans, vrot);
-  find_best();
+  find_best();//找到网络中能量最大的pose cell
   odo_update = true;
 }
 
@@ -1021,7 +1023,8 @@ void PosecellNetwork::create_view_template()
 }
 
 
-/*input:
+/* 该函数主要是local_view_cell接受刺激，并将刺激能量注入到pose_cell网络中
+ * input:
  *      vt: 当前激活的local view cell id,即current_id,也就是LV节点发布的消息内容
  *      vt_rad: relative_rad
  *      */
@@ -1059,11 +1062,13 @@ void PosecellNetwork::on_view_template(unsigned int vt, double vt_rad)
 			pc_th_corrected = PC_DIM_TH + pc_th_corrected;
 		if (pc_th_corrected >= PC_DIM_TH)
 			pc_th_corrected = pc_th_corrected - PC_DIM_TH;
+		//将能量注入到Posecell网络中心
         inject((int)pcvt->pc_x, (int)pcvt->pc_y, (int)pc_th_corrected, energy);
       }
     }
   }
 
+  //全局抑制
   for (unsigned int i=0; i < visual_templates.size(); i++)
   {
     visual_templates[i].decay -= PC_VT_RESTORE;
