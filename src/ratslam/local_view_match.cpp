@@ -337,6 +337,7 @@ namespace ratslam {
                                 continue;
 
                             // for each vt try matching the view at different offsets
+                            // 错位匹配 at different offsets, 忽略y方向上的偏移，仅在x方向上偏移
                             // try to fast break based on error already great than previous errors
                             // handles 2d images shifting only in the x direction
                             // note I haven't tested on a 1d yet.
@@ -348,7 +349,7 @@ namespace ratslam {
                                 column_end_ptr = &data[0] + TEMPLATE_SIZE - offset;
                                 sub_row_size = TEMPLATE_X_SIZE - offset;
 
-                                // do from offset to end
+                                // do from offset to end.....0
                                 for (column_row_ptr = column_start_ptr, template_row_ptr = template_start_ptr;
                                      column_row_ptr <
                                      column_end_ptr; column_row_ptr += row_size, template_row_ptr += row_size) {
