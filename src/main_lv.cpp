@@ -58,11 +58,24 @@ bool use_graphics;
 using namespace ratslam;
 ratslam::LocalViewMatch *lv = NULL;
 
+
+/*函数功能：回调函数，处理订阅的图像信息
+ * input: image
+ * output: vt_output.current_id
+ *          vt_output.relative_rad
+ *          */
 void image_callback(sensor_msgs::ImageConstPtr image, ros::Publisher *pub_vt) {
     ROS_DEBUG_STREAM("LV:image_callback{" << ros::Time::now() << "} seq=" << image->header.seq);
 
-    static ratslam_ros::ViewTemplate vt_output;
+    static ratslam_ros::ViewTemplate vt_output;//创建一个ViewTemplate类型的消息vt_output
 
+    /*
+     * on_image:
+     * 1、将原始图片转化为灰度图，
+     * 2、裁切图片，
+     * 3、并池化为指定大小的view_image,
+     * 4、global normalization and patch normalization
+     * 5、然后与存储的template对比，返回匹配到的模板id或新建立的模板id*/
     lv->on_image(&image->data[0], (image->encoding == "bgr8" ? false : true), image->width, image->height);
 
     vt_output.header.stamp = ros::Time::now();
@@ -70,7 +83,7 @@ void image_callback(sensor_msgs::ImageConstPtr image, ros::Publisher *pub_vt) {
     vt_output.current_id = lv->get_current_vt(); //得到当前激活的模板id
     vt_output.relative_rad = lv->get_relative_rad(); //得到模板对应的角度
 
-    pub_vt->publish(vt_output);
+    pub_vt->publish(vt_output); //发布消息
 
 #ifdef HAVE_IRRLICHT
     if (use_graphics) {

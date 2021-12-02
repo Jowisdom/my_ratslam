@@ -122,12 +122,13 @@ int main(int argc, char *argv[]) {
     get_setting_child(general_settings, settings, "general", true);
     get_setting_from_ptree(topic_root, general_settings, "topic_root", (std::string) "");
 
+    //初始化一个RatSLAMPoseCells节点
     if (!ros::isInitialized()) {
         ros::init(argc, argv, "RatSLAMPoseCells");
     }
     ros::NodeHandle node;
 
-    //建立PoseCellNetwork
+    //建立一个PoseCellNetwork对象
     ratslam::PosecellNetwork *pc = new ratslam::PosecellNetwork(ratslam_settings);
 
 

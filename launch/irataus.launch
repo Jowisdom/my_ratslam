@@ -1,4 +1,4 @@
-<launch>
+<launch>We refer to the automatic creation of an algorithm that computes derivative values from an algorithm that computes function values as Algorithmic Differentiation,
 
     <machine name="local_alt" address="localhost" default="true"/>
     <!--  node_name:表示要运行的节点名称

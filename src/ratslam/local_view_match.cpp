@@ -80,8 +80,6 @@ namespace ratslam {
  *
  *
  * */
-
-
     void LocalViewMatch::on_image(const unsigned char *view_rgb, bool greyscale, unsigned int image_width,
                                   unsigned int image_height) {
         if (view_rgb == NULL)
@@ -89,7 +87,7 @@ namespace ratslam {
 
         IMAGE_WIDTH = image_width;
         IMAGE_HEIGHT = image_height;
-
+        //设置size of cropping region of the original camera image
         if (IMAGE_VT_X_RANGE_MAX == -1)
             IMAGE_VT_X_RANGE_MAX = IMAGE_WIDTH;
         if (IMAGE_VT_Y_RANGE_MAX == -1)
@@ -98,19 +96,19 @@ namespace ratslam {
         this->view_rgb = view_rgb;
         this->greyscale = greyscale;
 
-        //1、转化为view_template
+        //1、池化为指定大小的view_template
         convert_view_to_view_template(greyscale);
-        prev_vt = get_current_vt();
+        prev_vt = get_current_vt();//保存匹配前的current_id
         unsigned int vt_match_id;
 
         //2、与存储的所有的template进行比较，
-        // 如果匹配误差vt_match_id小于阈值，激活current_vt
+        // 如果匹配误差vt_match_id小于阈值，则将匹配到模板id设置为current_id，并保存修改前的current_id为prev_vt
         // 如果匹配误差vt_match_id大于阈值，则将该view_template存储到template，并令pre_vt=current_vt
         compare(vt_error, vt_match_id); //返回匹配到的模板vt_match_id和匹配误差vt_error
         if (vt_error <= VT_MATCH_THRESHOLD) {
             set_current_vt((int) vt_match_id);
             cout << "VTM[" << setw(4) << get_current_vt() << "] " << endl;
-            cout.flush();
+            cout.flush(); //清空缓冲区
         } else {
             vt_relative_rad = 0;
             set_current_vt(create_template());
@@ -197,6 +195,7 @@ namespace ratslam {
             }
         }
         //--------------------------------------------------------------------------------------------------------------
+        //global normalization
         if (VT_NORMALISATION > 0) {
             double avg_value = 0;
 

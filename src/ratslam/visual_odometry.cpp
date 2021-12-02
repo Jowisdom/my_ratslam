@@ -53,7 +53,7 @@ VisualOdometry::VisualOdometry(ptree settings)
   get_setting_from_ptree(VTRANS_SCALING, settings, "vtrans_scaling", 100.0);
   get_setting_from_ptree(VTRANS_MAX, settings, "vtrans_max", 20.0);
 
-  vtrans_profile.resize(VTRANS_IMAGE_X_MAX - VTRANS_IMAGE_X_MIN);
+  vtrans_profile.resize(VTRANS_IMAGE_X_MAX - VTRANS_IMAGE_X_MIN); //裁切区域的大小
   vtrans_prev_profile.resize(VTRANS_IMAGE_X_MAX - VTRANS_IMAGE_X_MIN);
   vrot_profile.resize(VROT_IMAGE_X_MAX - VROT_IMAGE_X_MIN);
   vrot_prev_profile.resize(VROT_IMAGE_X_MAX - VROT_IMAGE_X_MIN);
