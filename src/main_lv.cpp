@@ -153,7 +153,9 @@ int main(int argc, char *argv[]) {
         lvs = new ratslam::LocalViewScene(draw_settings, lv);
 #endif
 
+
     ros::spin();
 
     return 0;
 }
+

@@ -53,12 +53,13 @@ using namespace ratslam;
 
 ratslam_ros::TopologicalAction pc_output;
 
+//path integration and pulish pc_output to main_em
 void odo_callback(nav_msgs::OdometryConstPtr odo, ratslam::PosecellNetwork *pc, ros::Publisher *pub_pc) {
     ROS_DEBUG_STREAM(
             "PC:odo_callback{" << ros::Time::now() << "} seq=" << odo->header.seq << " v=" << odo->twist.twist.linear.x
                                << " r=" << odo->twist.twist.angular.z);
 
-    static ros::Time prev_time(0);
+    static ros::Time prev_time(0); //时间清零
 
     if (prev_time.toSec() > 0) {
         double time_diff = (odo->header.stamp - prev_time).toSec();
@@ -89,6 +90,7 @@ void odo_callback(nav_msgs::OdometryConstPtr odo, ratslam::PosecellNetwork *pc, 
     prev_time = odo->header.stamp;
 }
 
+//根据激活的local_view_cell的id向对应的pose_cell插入刺激
 void template_callback(ratslam_ros::ViewTemplateConstPtr vt, ratslam::PosecellNetwork *pc, ros::Publisher *pub_pc) {
     ROS_DEBUG_STREAM(
             "PC:vt_callback{" << ros::Time::now() << "} seq=" << vt->header.seq << " id=" << vt->current_id << " rad="
