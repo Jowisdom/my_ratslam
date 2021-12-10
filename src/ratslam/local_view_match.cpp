@@ -42,6 +42,7 @@ using namespace std;
 
 #include <stdio.h>
 
+
 namespace ratslam {
 
     LocalViewMatch::LocalViewMatch(ptree settings) {
@@ -117,6 +118,38 @@ namespace ratslam {
         }
 
     }
+    void LocalViewMatch::on_image_ORB(sensor_msgs::ImageConstPtr &image, bool greyscale, unsigned int image_width,
+                                  unsigned int image_height) {
+        if (image == NULL)
+            return;
+
+        //将ros::msg转化为cv::mat
+        cv::Mat img;
+        cv_bridge::CvImagePtr cv_ptr;
+        cv_ptr = cv_bridge::toCvCopy(image, "mono8");
+        cv_ptr->image.copyTo(img);
+
+        //提取图像ORB特征点和计算描述子
+        std::vector<cv::KeyPoint> keypoints;
+        cv::Mat descriptors;
+        cv::Ptr<cv::FeatureDetector> detector = cv::ORB::create();
+        cv::Ptr<cv::DescriptorExtractor> descriptor = cv::ORB::create();
+        detector->detect ( img,keypoints );
+        
+
+
+        //如果size(ORB_vt_set)=0，则保存特征点和描述子ORB_vt到ORB_vt_set
+
+
+        //如果size(ORB_vt_set)！=0，与ORB_vt_set进行匹配
+            //创建新的ORB_vt到ORB_vt_set,
+
+            // 或者在ORB_vt_set找到匹配到的id
+
+
+
+    }
+
 
     void LocalViewMatch::clip_view_x_y(int &x, int &y) {
         if (x < 0)

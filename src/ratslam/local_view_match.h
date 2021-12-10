@@ -42,6 +42,7 @@
 #include <vector>
 #include <fstream>
 
+#include<cv_bridge/cv_bridge.h>
 #define _USE_MATH_DEFINES
 #include "math.h"
 
@@ -51,6 +52,12 @@ using boost::property_tree::ptree;
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/utility.hpp>
 #include <boost/serialization/vector.hpp>
+
+//OpenCV2标准头文件
+#include<opencv2/opencv.hpp>
+#include<opencv2/core/core.hpp>
+#include<opencv2/highgui/highgui.hpp>
+#include<opencv2/imgproc/imgproc.hpp>
 
 namespace ratslam
 {
@@ -81,6 +88,8 @@ public:
   ~LocalViewMatch();
 
   void on_image(const unsigned char *view_rgb, bool greyscale, unsigned int image_width, unsigned int image_height);
+
+  void on_image_ORB(sensor_msgs::ImageConstPtr &image, bool greyscale, unsigned int image_width,unsigned int image_height);
 
   int get_current_vt()
   {
