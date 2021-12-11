@@ -69,6 +69,9 @@ namespace ratslam {
 
         current_vt = 0;
         prev_vt = 0;
+        keyPoint_pool.reserve(100000);
+        descriptor_pool.reserve(10000);
+
     }
 
 
@@ -118,8 +121,8 @@ namespace ratslam {
         }
 
     }
-    void LocalViewMatch::on_image_ORB(sensor_msgs::ImageConstPtr &image, bool greyscale, unsigned int image_width,
-                                  unsigned int image_height) {
+
+    void LocalViewMatch::on_image_ORB(sensor_msgs::ImageConstPtr &image) {
         if (image == NULL)
             return;
 
@@ -134,21 +137,61 @@ namespace ratslam {
         cv::Mat descriptors;
         cv::Ptr<cv::FeatureDetector> detector = cv::ORB::create();
         cv::Ptr<cv::DescriptorExtractor> descriptor = cv::ORB::create();
-        detector->detect ( img,keypoints );
-        
-
+        detector->detect(img, keypoints);
 
         //如果size(ORB_vt_set)=0，则保存特征点和描述子ORB_vt到ORB_vt_set
+        if (keyPoint_pool.empty() && descriptor_pool.empty()) {
+            keyPoint_pool.push_back(keypoints);
+            descriptor_pool.push_back(descriptors);
+        } else {
+            //如果size(ORB_vt_set)！=0，与ORB_vt_set进行匹配
+            std::vector<int> num_match;
+            for (int i = 0; i < descriptor_pool.size(); ++i) {
+                cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create("BruteForce-Hamming");
+                vector<cv::DMatch> matches;
+                matcher->match(descriptors, descriptor_pool[i], matches);
+                //    fmt::print("old_matches.size()={}\n",matches.size());
+                //-- 第四步:匹配点对筛选
+                // 计算最小距离和最大距离
+                auto min_max = minmax_element(matches.begin(), matches.end(),
+                                              [](const cv::DMatch &m1, const cv::DMatch &m2) { return m1.distance < m2.distance; });
+                double min_dist = min_max.first->distance;
+                double max_dist = min_max.second->distance;
 
+                //    printf("-- Max dist : %f \n", max_dist);
+                //    printf("-- Min dist : %f \n", min_dist);
 
-        //如果size(ORB_vt_set)！=0，与ORB_vt_set进行匹配
-            //创建新的ORB_vt到ORB_vt_set,
+                //当描述子之间的距离大于两倍的最小距离时,即认为匹配有误.但有时候最小距离会非常小,设置一个经验值30作为下限.
+                std::vector<cv::DMatch> good_matches;
+                for (int i = 0; i < descriptors.rows; i++) {
+                    if (matches[i].distance <= max(2 * min_dist, 40.0)) {
+                        good_matches.push_back(matches[i]);
+                    }
+                }
+                num_match.push_back(good_matches.size());
+            }
+            auto biggest_num = std::max_element(std::begin(num_match), std::end(num_match));
 
-            // 或者在ORB_vt_set找到匹配到的id
-
+            if (*biggest_num > 100){
+                // 匹配到或者在ORB_vt_set找到匹配到的id
+                current_vt = biggest_num - num_match.begin();
+            }else{
+                //没匹配到创建新的ORB_vt到ORB_vt_set,
+                keyPoint_pool.push_back(keypoints);
+                descriptor_pool.push_back(descriptors);
+                current_vt = descriptor_pool.size()-1;
+            }
+        }
+        vt_relative_rad = 0;
 
 
     }
+
+
+
+
+
+
 
 
     void LocalViewMatch::clip_view_x_y(int &x, int &y) {

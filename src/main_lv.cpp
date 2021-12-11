@@ -76,8 +76,8 @@ void image_callback(sensor_msgs::ImageConstPtr image, ros::Publisher *pub_vt) {
      * 3、并池化为指定大小的view_image,
      * 4、global normalization and patch normalization
      * 5、然后与存储的template对比，返回匹配到的模板id或新建立的模板id*/
-    lv->on_image(&image->data[0], (image->encoding == "bgr8" ? false : true), image->width, image->height);
-
+//    lv->on_image(&image->data[0], (image->encoding == "bgr8" ? false : true), image->width, image->height);
+    lv->on_image_ORB(image);
     vt_output.header.stamp = ros::Time::now();
     vt_output.header.seq++;
     vt_output.current_id = lv->get_current_vt(); //得到当前激活的模板id
@@ -85,11 +85,11 @@ void image_callback(sensor_msgs::ImageConstPtr image, ros::Publisher *pub_vt) {
 
     pub_vt->publish(vt_output); //发布消息
 
-#ifdef HAVE_IRRLICHT
-    if (use_graphics) {
-        lvs->draw_all();
-    }
-#endif
+//#ifdef HAVE_IRRLICHT
+//    if (use_graphics) {
+//        lvs->draw_all();
+//    }
+//#endif
 }
 
 

@@ -59,6 +59,8 @@ using boost::property_tree::ptree;
 #include<opencv2/highgui/highgui.hpp>
 #include<opencv2/imgproc/imgproc.hpp>
 
+#include<Eigen/Dense>
+
 namespace ratslam
 {
 
@@ -89,7 +91,7 @@ public:
 
   void on_image(const unsigned char *view_rgb, bool greyscale, unsigned int image_width, unsigned int image_height);
 
-  void on_image_ORB(sensor_msgs::ImageConstPtr &image, bool greyscale, unsigned int image_width,unsigned int image_height);
+  void on_image_ORB(sensor_msgs::ImageConstPtr &image);
 
   int get_current_vt()
   {
@@ -189,6 +191,9 @@ private:
 
   const unsigned char *view_rgb;
   bool greyscale;
+
+  std::vector<std::vector<cv::KeyPoint>> keyPoint_pool=std::vector<std::vector<cv::KeyPoint>>(0);
+  std::vector<cv::Mat> descriptor_pool=std::vector<cv::Mat>(0);
 
 };
 
