@@ -41,11 +41,15 @@
 #include <iostream>
 #include <vector>
 #include <fstream>
-
+#include <ros/ros.h>
 #include<cv_bridge/cv_bridge.h>
 #define _USE_MATH_DEFINES
 #include "math.h"
-
+#include <ros/ros.h>
+#include <sensor_msgs/Image.h>
+#include <sensor_msgs/CompressedImage.h>
+#include <ratslam_ros/ViewTemplate.h>
+#include <ros/console.h>
 #include <boost/property_tree/ini_parser.hpp>
 using boost::property_tree::ptree;
 
@@ -83,13 +87,13 @@ struct VisualTemplate
 class LocalViewMatch
 {
 public:
-  friend class LocalViewScene;
+//  friend class LocalViewScene;
 
-  LocalViewMatch(ptree settings);
+  LocalViewMatch();
 
   ~LocalViewMatch();
 
-  void on_image(const unsigned char *view_rgb, bool greyscale, unsigned int image_width, unsigned int image_height);
+//  void on_image(const unsigned char *view_rgb, bool greyscale, unsigned int image_width, unsigned int image_height);
 
   void on_image_ORB(sensor_msgs::ImageConstPtr &image);
 
@@ -102,98 +106,105 @@ public:
   {
     return vt_relative_rad;
   }
+//
+//  template<typename Archive>
+//    void serialize(Archive& ar, const unsigned int version)
+//    {
+//      ar & VT_SHIFT_MATCH;
+//      ar & VT_STEP_MATCH;
+//      ar & VT_MATCH_THRESHOLD;
+//      ar & TEMPLATE_SIZE;
+//      ar & IMAGE_WIDTH;
+//      ar & IMAGE_HEIGHT;
+//      ar & IMAGE_VT_X_RANGE_MIN;
+//      ar & IMAGE_VT_X_RANGE_MAX;
+//      ar & IMAGE_VT_Y_RANGE_MIN;
+//      ar & IMAGE_VT_Y_RANGE_MAX;
+//      ar & TEMPLATE_X_SIZE;
+//      ar & TEMPLATE_Y_SIZE;
+//      ar & VT_PATCH_NORMALISATION;
+//      ar & VT_MIN_PATCH_NORMALISATION_STD;
+//      ar & VT_NORMALISATION;
+//      ar & VT_PANORAMIC;
+//
+//      ar & templates;
+//      ar & current_view;
+//      ar & current_mean;
+//      ar & image_size;
+//      ar & current_vt;
+//      ar & vt_error;
+//      ar & prev_vt;
+//      ar & vt_relative_rad;
+//
+//    }
+//
+//private:
+//  friend class boost::serialization::access;
+//
+//  LocalViewMatch()
+//  {
+//    ;
+//  }
+//  void clip_view_x_y(int &x, int &y);
+//
+//  // create and add a visual template to the collection
+//  int create_template();
+//
+//  void set_current_vt(int id)
+//  {
+//    if (current_vt != id)
+//      prev_vt = current_vt;
+//
+//    current_vt = id;
+//  }
+//
+//  void convert_view_to_view_template(bool grayscale);
+//
+//  // compare a visual template to all the stored templates, allowing for
+//  // slen pixel shifts in each direction
+//  // returns the matching template and the MSE
+//  void compare(double &vt_err, unsigned int &vt_match_id);
+//
+//  int VT_SHIFT_MATCH;
+//  int VT_STEP_MATCH;
+//
+//  double VT_MATCH_THRESHOLD;
+//  int TEMPLATE_SIZE;
+//  int IMAGE_WIDTH;
+//  int IMAGE_HEIGHT;
+//  int IMAGE_VT_X_RANGE_MIN;
+//  int IMAGE_VT_X_RANGE_MAX;
+//  int IMAGE_VT_Y_RANGE_MIN;
+//  int IMAGE_VT_Y_RANGE_MAX;
+//  int TEMPLATE_X_SIZE;
+//  int TEMPLATE_Y_SIZE;
+//  int VT_PATCH_NORMALISATION;
+//  double VT_MIN_PATCH_NORMALISATION_STD;
+//  double VT_NORMALISATION;
+//  int VT_PANORAMIC;
+//
+//  std::vector<VisualTemplate> templates;
+//  std::vector<double> current_view;
+//
+//  int image_size;
+//  int current_vt;
+//  double current_mean;
+//  double vt_error;
+//  int prev_vt;
+//  double vt_relative_rad;
+//
+//  const unsigned char *view_rgb;
+//  bool greyscale;
 
-  template<typename Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-      ar & VT_SHIFT_MATCH;
-      ar & VT_STEP_MATCH;
-      ar & VT_MATCH_THRESHOLD;
-      ar & TEMPLATE_SIZE;
-      ar & IMAGE_WIDTH;
-      ar & IMAGE_HEIGHT;
-      ar & IMAGE_VT_X_RANGE_MIN;
-      ar & IMAGE_VT_X_RANGE_MAX;
-      ar & IMAGE_VT_Y_RANGE_MIN;
-      ar & IMAGE_VT_Y_RANGE_MAX;
-      ar & TEMPLATE_X_SIZE;
-      ar & TEMPLATE_Y_SIZE;
-      ar & VT_PATCH_NORMALISATION;
-      ar & VT_MIN_PATCH_NORMALISATION_STD;
-      ar & VT_NORMALISATION;
-      ar & VT_PANORAMIC;
 
-      ar & templates;
-      ar & current_view;
-      ar & current_mean;
-      ar & image_size;
-      ar & current_vt;
-      ar & vt_error;
-      ar & prev_vt;
-      ar & vt_relative_rad;
+        double vt_relative_rad;
+        int current_vt;
+        int prev_vt;
+//todo
+//
 
-    }
-
-private:
-  friend class boost::serialization::access;
-
-  LocalViewMatch()
-  {
-    ;
-  }
-  void clip_view_x_y(int &x, int &y);
-
-  // create and add a visual template to the collection
-  int create_template();
-
-  void set_current_vt(int id)
-  {
-    if (current_vt != id)
-      prev_vt = current_vt;
-
-    current_vt = id;
-  }
-
-  void convert_view_to_view_template(bool grayscale);
-
-  // compare a visual template to all the stored templates, allowing for
-  // slen pixel shifts in each direction
-  // returns the matching template and the MSE
-  void compare(double &vt_err, unsigned int &vt_match_id);
-
-  int VT_SHIFT_MATCH;
-  int VT_STEP_MATCH;
-
-  double VT_MATCH_THRESHOLD;
-  int TEMPLATE_SIZE;
-  int IMAGE_WIDTH;
-  int IMAGE_HEIGHT;
-  int IMAGE_VT_X_RANGE_MIN;
-  int IMAGE_VT_X_RANGE_MAX;
-  int IMAGE_VT_Y_RANGE_MIN;
-  int IMAGE_VT_Y_RANGE_MAX;
-  int TEMPLATE_X_SIZE;
-  int TEMPLATE_Y_SIZE;
-  int VT_PATCH_NORMALISATION;
-  double VT_MIN_PATCH_NORMALISATION_STD;
-  double VT_NORMALISATION;
-  int VT_PANORAMIC;
-
-  std::vector<VisualTemplate> templates;
-  std::vector<double> current_view;
-
-  int image_size;
-  int current_vt;
-  double current_mean;
-  double vt_error;
-  int prev_vt;
-  double vt_relative_rad;
-
-  const unsigned char *view_rgb;
-  bool greyscale;
-
-  std::vector<std::vector<cv::KeyPoint>> keyPoint_pool=std::vector<std::vector<cv::KeyPoint>>(0);
-  std::vector<cv::Mat> descriptor_pool=std::vector<cv::Mat>(0);
+//        std::vector<std::vector<cv::KeyPoint>> keyPoint_pool = std::vector<std::vector<cv::KeyPoint>>(0);
+//        std::vector<cv::Mat> descriptor_pool = std::vector<cv::Mat>(0);
 
 };
 
