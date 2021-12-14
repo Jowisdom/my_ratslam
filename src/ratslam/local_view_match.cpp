@@ -77,19 +77,19 @@ namespace ratslam {
             vector<cv::DMatch> matches;
             try {
                 matcher->match(descriptors, descriptor_pool[i], matches);
-                //计算最小距离和最大距离
-                auto min_max = minmax_element(matches.begin(), matches.end(),
-                                              [](const cv::DMatch &m1, const cv::DMatch &m2) { return m1.distance < m2.distance; });
-                double min_dist = min_max.first->distance;
-                double max_dist = min_max.second->distance;
-                //当描述子之间的距离大于两倍的最小距离时,即认为匹配有误.但有时候最小距离会非常小,设置一个经验值30作为下限.
-                std::vector<cv::DMatch> good_matches;
-                for (auto &item_match : matches) {
-                    if (item_match.distance <= max(1.5*min_dist,20.0)) {
-                        good_matches.push_back(item_match);
-                    }
-                }
-                num_match.push_back(good_matches.size());
+//                //计算最小距离和最大距离
+//                auto min_max = minmax_element(matches.begin(), matches.end(),
+//                                              [](const cv::DMatch &m1, const cv::DMatch &m2) { return m1.distance < m2.distance; });
+//                double min_dist = min_max.first->distance;
+//                double max_dist = min_max.second->distance;
+//                //当描述子之间的距离大于两倍的最小距离时,即认为匹配有误.但有时候最小距离会非常小,设置一个经验值30作为下限.
+//                std::vector<cv::DMatch> good_matches;
+//                for (auto &item_match : matches) {
+//                    if (item_match.distance <= max(2*min_dist,30.0)) {
+//                        good_matches.push_back(item_match);
+//                    }
+//                }
+                num_match.push_back(matches.size());
             } catch (...) {
                 ROS_INFO_STREAM("匹配失败");
                 num_match.push_back(0);
@@ -100,7 +100,7 @@ namespace ratslam {
         ROS_INFO_STREAM("num_match_size=" << num_match.size() << endl;);
         auto biggest_num = std::max_element(std::begin(num_match), std::end(num_match));
 
-        if (*biggest_num > 350) {
+        if (*biggest_num > 490) {
             // 匹配到或者在ORB_vt_set找到匹配到的id
             current_vt = biggest_num - num_match.begin();
 //            ROS_INFO_STREAM("big_id=" << current_vt << endl);
@@ -115,7 +115,7 @@ namespace ratslam {
         ROS_INFO_STREAM("激活的id:current_vt = " << current_vt);
         ROS_INFO_STREAM("The size of descriptor_pool:" << descriptor_pool.size() << endl);
 
-        cv::waitKey(30);
+        cv::waitKey(2);
 
     }
 }
