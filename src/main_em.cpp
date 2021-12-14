@@ -66,7 +66,7 @@ void odo_callback(nav_msgs::OdometryConstPtr odo, ratslam::ExperienceMap *em) {
             "EM:odo_callback{" << ros::Time::now() << "} seq=" << odo->header.seq << " v=" << odo->twist.twist.linear.x
                                << " r=" << odo->twist.twist.angular.z);
 
-    static ros::Time prev_time(ros::Time::now());
+    static ros::Time prev_time(0);
 
     if (prev_time.toSec() > 0) {
         double time_diff = (odo->header.stamp - prev_time).toSec();
