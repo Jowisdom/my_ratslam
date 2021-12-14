@@ -67,35 +67,15 @@ ratslam::LocalViewMatch *lv = NULL;
 void image_callback(sensor_msgs::ImageConstPtr image, ros::Publisher *pub_vt) {
     ROS_DEBUG_STREAM("LV:image_callback{" << ros::Time::now() << "} seq=" << image->header.seq);
 
-
-//    try {
-//        cv::imshow("view", cv_bridge::toCvShare(image, "bgr8")->image);
-//        cv::waitKey(30);
-//    }
-//    catch (cv_bridge::Exception &e) {
-//        ROS_ERROR("Could not convert from '%s' to 'bgr8'.", image->encoding.c_str());
-//    }
-
-
-
     static ratslam_ros::ViewTemplate vt_output;//创建一个ViewTemplate类型的消息vt_output
 
-    /*
-     * on_image:
-     * 1、将原始图片转化为灰度图，
-     * 2、裁切图片，
-     * 3、并池化为指定大小的view_image,
-     * 4、global normalization and patch normalization
-     * 5、然后与存储的template对比，返回匹配到的模板id或新建立的模板id*/
-//    lv->on_image(&image->data[0], (image->encoding == "bgr8" ? false : true), image->width, image->height);
-
     lv->on_image_ORB(image);
-//    vt_output.header.stamp = ros::Time::now();
-//    vt_output.header.seq++;
-//    vt_output.current_id = lv->get_current_vt(); //得到当前激活的模板id
-//    vt_output.relative_rad = lv->get_relative_rad(); //得到模板对应的角度
-//
-//    pub_vt->publish(vt_output); //发布消息
+    vt_output.header.stamp = ros::Time::now();
+    vt_output.header.seq++;
+    vt_output.current_id = lv->get_current_vt(); //得到当前激活的模板id
+    vt_output.relative_rad = lv->get_relative_rad(); //得到模板对应的角度
+
+    pub_vt->publish(vt_output); //发布消息
 
 //#ifdef HAVE_IRRLICHT
 //    if (use_graphics) {
@@ -151,17 +131,10 @@ int main(int argc, char *argv[]) {
 
     image_transport::ImageTransport it(node); //定义一个专用于图像的NodeHandle的对象
 
-    cv::namedWindow("view");
-    //使用上一步创建的节点处理对象创建一个subscriber
-    //订阅topic name:topic_root + "/camera/image",
-    //回调函数为boost::bind(image_callback, _1, &pub_vt),接受订阅话题的参数
-    //boost::bind为绑定函数，参见https://blog.csdn.net/byxdaz/article/details/71527369
-    //举个例子
-    //void test(int a, int b, int c)
-    //boost::bind(test, 1, _1, _2)得到一个函数对象b，当我们调用b(3,4)时，相当于调用test(1,3,4)
-    //boost::bind(test, _2, 3, _1)得到一个函数对象b，当我们调用b(3,4)时，相当于调用test(4,3,3)
+    cv::namedWindow("img_view");
 
-    image_transport::Subscriber sub = it.subscribe(topic_root + "/camera/image", 1,
+
+    image_transport::Subscriber sub = it.subscribe(topic_root + "/camera/image", 0,
                                                    boost::bind(image_callback, _1, &pub_vt));
 
 //#ifdef HAVE_IRRLICHT
@@ -172,9 +145,8 @@ int main(int argc, char *argv[]) {
 //        lvs = new ratslam::LocalViewScene(draw_settings, lv);
 //#endif
 
-
     ros::spin();
-    cv::destroyWindow("view");
+    cv::destroyWindow("img_view");
     return 0;
 }
 

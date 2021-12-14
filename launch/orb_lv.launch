@@ -8,25 +8,31 @@
           cwd:
           required: 默认为False，True表示必要节点，当该节点终止时，launch文件中的其他节点也被终止
     -->
+<!--启动rosbag-->
+    <node pkg="rosbag" type="play" name="play" output="screen"
+          args="/home/wisdom/ros_ws/src/ros_datasets/irat_aus_28112011.bag" required="true"/>
+
     <node name="RatSLAMLocalViewCells" pkg="ratslam_ros" type="ratslam_lv"
           args="_image_transport:=compressed" cwd="node" required="true"/>
 <!--    <node name="RatSLAMLocalViewCells" pkg="ratslam_ros" type="ratslam_lv"-->
 <!--          args="$(find ratslam_ros)/config/config_irataus.txt _image_transport:=compressed" cwd="node" required="true"/>-->
-<!--    <node name="RatSLAMPoseCells" pkg="ratslam_ros" type="ratslam_pc"-->
-<!--          args="$(find ratslam_ros)/config/config_irataus.txt _image_transport:=compressed" cwd="node" required="true"/>-->
-<!--    <node name="RatSLAMExperienceMap" pkg="ratslam_ros" type="ratslam_em"-->
-<!--          args="$(find ratslam_ros)/config/config_irataus.txt _image_transport:=compressed" cwd="node" required="true"/>-->
+    <node name="RatSLAMPoseCells" pkg="ratslam_ros" type="ratslam_pc"
+          args="$(find ratslam_ros)/config/config_irataus.txt _image_transport:=compressed" cwd="node" required="true"/>
+    <node name="RatSLAMExperienceMap" pkg="ratslam_ros" type="ratslam_em"
+          args="$(find ratslam_ros)/config/config_irataus.txt _image_transport:=compressed" cwd="node" required="true"/>
 
-<!--    <node pkg="rqt_plot" type="rqt_plot" name="plot_vt_em"-->
-<!--          args="/irat_red/LocalView/Template/current_id,/irat_red/PoseCell/TopologicalAction/dest_id"/>-->
-<!--    <node pkg="rosbag" type="record" name="record"-->
-<!--          args="/irat_red/ExperienceMap/Map -->
-<!--          /irat_red/ExperienceMap/RobotPose -->
-<!--          /irat_red/LocalView/Template -->
-<!--          /irat_red/PoseCell/TopologicalAction -->
-<!--          /overhead/pose -->
-<!--          -O ratslam_out.bag"/>-->
+    <node pkg="rqt_plot" type="rqt_plot" name="plot_vt_em"
+          args="/irat_red/LocalView/Template/current_id,/irat_red/PoseCell/TopologicalAction/dest_id"/>
+    <node pkg="rosbag" type="record" name="record"
+          args="/irat_red/ExperienceMap/Map
+          /irat_red/ExperienceMap/RobotPose
+          /irat_red/LocalView/Template
+          /irat_red/PoseCell/TopologicalAction
+          /overhead/pose
+          -O ratslam_out.bag"/>
 
+
+<!--该节点用于接受图像信息并显示-->
     <node pkg="image_view" type="image_view" name="overhead"
           args="image:=/overhead/camera/image _image_transport:=compressed"/>
 

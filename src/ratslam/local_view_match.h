@@ -203,8 +203,8 @@ public:
 //todo
 //
 
-//        std::vector<std::vector<cv::KeyPoint>> keyPoint_pool = std::vector<std::vector<cv::KeyPoint>>(0);
-//        std::vector<cv::Mat> descriptor_pool = std::vector<cv::Mat>(0);
+        std::vector<std::vector<cv::KeyPoint>> keyPoint_pool = std::vector<std::vector<cv::KeyPoint>>(0);
+        std::vector<cv::Mat> descriptor_pool = std::vector<cv::Mat>(0);
 
 };
 

@@ -1,31 +1,3 @@
-/*
- * openRatSLAM
- *
- * utils - General purpose utility helper functions mainly for angles and readings settings
- *
- * Copyright (C) 2012
- * David Ball (david.ball@qut.edu.au) (1), Scott Heath (scott.heath@uqconnect.edu.au) (2)
- *
- * RatSLAM algorithm by:
- * Michael Milford (1) and Gordon Wyeth (1) ([michael.milford, gordon.wyeth]@qut.edu.au)
- *
- * 1. Queensland University of Technology, Australia
- * 2. The University of Queensland, Australia
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 #include "local_view_match.h"
 #include "../utils/utils.h"
 
@@ -46,31 +18,6 @@ using namespace std;
 namespace ratslam {
 
     LocalViewMatch::LocalViewMatch() {
-//        get_setting_from_ptree(VT_MIN_PATCH_NORMALISATION_STD, settings, "vt_min_patch_normalisation_std", (double) 0);
-//        get_setting_from_ptree(VT_PATCH_NORMALISATION, settings, "vt_patch_normalise", 0);
-//        get_setting_from_ptree(VT_NORMALISATION, settings, "vt_normalisation", (double) 0);
-//        get_setting_from_ptree(VT_SHIFT_MATCH, settings, "vt_shift_match", 25);
-//        get_setting_from_ptree(VT_STEP_MATCH, settings, "vt_step_match", 5);
-//        get_setting_from_ptree(VT_PANORAMIC, settings, "vt_panoramic", 0);
-//
-//        get_setting_from_ptree(VT_MATCH_THRESHOLD, settings, "vt_match_threshold", 0.03);
-//        get_setting_from_ptree(TEMPLATE_X_SIZE, settings, "template_x_size", 1);
-//        get_setting_from_ptree(TEMPLATE_Y_SIZE, settings, "template_y_size", 1);
-//        get_setting_from_ptree(IMAGE_VT_X_RANGE_MIN, settings, "image_crop_x_min", 0);
-//        get_setting_from_ptree(IMAGE_VT_X_RANGE_MAX, settings, "image_crop_x_max", -1);
-//        get_setting_from_ptree(IMAGE_VT_Y_RANGE_MIN, settings, "image_crop_y_min", 0);
-//        get_setting_from_ptree(IMAGE_VT_Y_RANGE_MAX, settings, "image_crop_y_max", -1);
-//
-//        TEMPLATE_SIZE = TEMPLATE_X_SIZE * TEMPLATE_Y_SIZE;
-//
-//        templates.reserve(10000);//预分配指定大小的空间
-//
-//        current_view.resize(TEMPLATE_SIZE);
-
-//        current_vt = 0;
-//        prev_vt = 0;
-//        keyPoint_pool.reserve(100000);
-//        descriptor_pool.reserve(10000);
 
     }
 
@@ -80,73 +27,148 @@ namespace ratslam {
     }
 
 
-/*input: a view_rgb image, greyscale, image_width, image_height
- *
- *
- * */
-//    void LocalViewMatch::on_image(const unsigned char *view_rgb, bool greyscale, unsigned int image_width,
-//                                  unsigned int image_height) {
-//        if (view_rgb == NULL)
-//            return;
-//
-//        IMAGE_WIDTH = image_width;
-//        IMAGE_HEIGHT = image_height;
-//        //设置size of cropping region of the original camera image
-//        if (IMAGE_VT_X_RANGE_MAX == -1)
-//            IMAGE_VT_X_RANGE_MAX = IMAGE_WIDTH;
-//        if (IMAGE_VT_Y_RANGE_MAX == -1)
-//            IMAGE_VT_Y_RANGE_MAX = IMAGE_HEIGHT;
-//
-//        this->view_rgb = view_rgb;
-//        this->greyscale = greyscale;
-//
-//        //1、池化为指定大小的view_template
-//        convert_view_to_view_template(greyscale);
-//        prev_vt = get_current_vt();//保存匹配前的current_id
-//        unsigned int vt_match_id;
-//
-//        //2、与存储的所有的template进行比较，
-//        // 如果匹配误差vt_match_id小于阈值，则将匹配到模板id设置为current_id，并保存修改前的current_id为prev_vt
-//        // 如果匹配误差vt_match_id大于阈值，则将该view_template存储到template，并令pre_vt=current_vt
-//        compare(vt_error, vt_match_id); //返回匹配到的模板vt_match_id和匹配误差vt_error
-//        if (vt_error <= VT_MATCH_THRESHOLD) {
-//            set_current_vt((int) vt_match_id);
-//            cout << "VTM[" << setw(4) << get_current_vt() << "] " << endl;
-//            cout.flush(); //清空缓冲区
-//        } else {
-//            vt_relative_rad = 0;
-//            set_current_vt(create_template());
-//            cout << "VTN[" << setw(4) << get_current_vt() << "] " << endl;
-//            cout.flush();
-//        }
-//
-//    }
-
     void LocalViewMatch::on_image_ORB(sensor_msgs::ImageConstPtr &image) {
-
-
-
+        cv::Mat img;
         try {
             //将ros::msg转化为cv::mat
-            cv::Mat img = cv_bridge::toCvShare(image, "mono8")->image;
-            cv::imshow("view",img);
-
-
-            //提取图像ORB特征点和计算描述子
-            std::vector<cv::KeyPoint> keypoints;
-            cv::Mat descriptors;
-            cv::Ptr<cv::FeatureDetector> detector = cv::ORB::create();
-            cv::Ptr<cv::DescriptorExtractor> descriptor = cv::ORB::create();
-            detector->detect(img, keypoints);
-
-            cv::Mat outimg1;
-            drawKeypoints(img, keypoints, outimg1, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT);
-            imshow("ORB features", outimg1);
-            cv::waitKey(30);
-        }
-        catch (cv_bridge::Exception &e) {
+            img = cv_bridge::toCvShare(image, "mono8")->image;
+        } catch (...) {
             ROS_ERROR("Could not convert from '%s' to 'mono8'.", image->encoding.c_str());
+            return;
         }
+
+        cv::imshow("img_view", img);
+
+        //提取图像ORB特征点和计算描述子
+
+        std::vector<cv::KeyPoint> keypoints;
+        cv::Mat descriptors;
+        cv::Ptr<cv::FeatureDetector> detector = cv::ORB::create();
+        cv::Ptr<cv::DescriptorExtractor> descriptor = cv::ORB::create();
+        try {
+            detector->detect(img, keypoints);
+            descriptor->compute(img, keypoints, descriptors);
+            if (keypoints.size()<=100){
+                return;
+            }
+            cv::Mat outimg_with_keypoints;
+            drawKeypoints(img, keypoints, outimg_with_keypoints, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT);
+            imshow("ORB features", outimg_with_keypoints);
+        } catch (...) {
+            ROS_INFO_STREAM("提取特征点失败");
+            return;
+        }
+
+        //如果size(ORB_vt_set)=0，则保存特征点和描述子ORB_vt到ORB_vt_set
+        if (keyPoint_pool.empty() && descriptor_pool.empty()) {
+            keyPoint_pool.push_back(keypoints);
+            descriptor_pool.push_back(descriptors);
+            return;
+        }
+
+        ROS_INFO("开始匹配......");
+        ROS_INFO_STREAM("The size of descriptor_pool: =" << descriptor_pool.size() << endl);
+
+        //如果size(ORB_vt_set)！=0，与ORB_vt_set进行匹配
+        std::vector<int> num_match;
+        for (int i = 0; i < descriptor_pool.size(); ++i) {
+            //ROS_INFO_STREAM("与第["<<i<<"]个模板进行匹配"<<endl);
+            cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create("BruteForce-Hamming");
+            vector<cv::DMatch> matches;
+            try {
+                matcher->match(descriptors, descriptor_pool[i], matches);
+                //计算最小距离和最大距离
+                auto min_max = minmax_element(matches.begin(), matches.end(),
+                                              [](const cv::DMatch &m1, const cv::DMatch &m2) { return m1.distance < m2.distance; });
+                double min_dist = min_max.first->distance;
+                double max_dist = min_max.second->distance;
+                //当描述子之间的距离大于两倍的最小距离时,即认为匹配有误.但有时候最小距离会非常小,设置一个经验值30作为下限.
+                std::vector<cv::DMatch> good_matches;
+                for (auto &item_match : matches) {
+                    if (item_match.distance <= max(1.5*min_dist,20.0)) {
+                        good_matches.push_back(item_match);
+                    }
+                }
+                num_match.push_back(good_matches.size());
+            } catch (...) {
+                ROS_INFO_STREAM("匹配失败");
+                num_match.push_back(0);
+            }
+        }
+
+
+        ROS_INFO_STREAM("num_match_size=" << num_match.size() << endl;);
+        auto biggest_num = std::max_element(std::begin(num_match), std::end(num_match));
+
+        if (*biggest_num > 350) {
+            // 匹配到或者在ORB_vt_set找到匹配到的id
+            current_vt = biggest_num - num_match.begin();
+//            ROS_INFO_STREAM("big_id=" << current_vt << endl);
+//            ROS_INFO_STREAM("The size of descriptor_pool:" << descriptor_pool.size() << endl);
+        } else {
+            //没匹配到创建新的ORB_vt到ORB_vt_set,
+            keyPoint_pool.push_back(keypoints);
+            descriptor_pool.push_back(descriptors);
+            current_vt = descriptor_pool.size() - 1;
+        }
+        vt_relative_rad = 0;
+        ROS_INFO_STREAM("激活的id:current_vt = " << current_vt);
+        ROS_INFO_STREAM("The size of descriptor_pool:" << descriptor_pool.size() << endl);
+
+        cv::waitKey(30);
+
+    }
+}
+//                    try {
+
+//                    ROS_INFO("匹配特征点成功");
+//                        ROS_INFO_STREAM("The size of matches:" << matches.size() << endl);
+//                 -- 第四步:匹配点对筛选
+
+//
+//                    //    printf("-- Max dist : %f \n", max_dist);
+//                    //    printf("-- Min dist : %f \n", min_dist);
+//
+//                    //当描述子之间的距离大于两倍的最小距离时,即认为匹配有误.但有时候最小距离会非常小,设置一个经验值30作为下限.
+//                    std::vector<cv::DMatch> good_matches;
+//                    for (int j = 0; j < descriptors.rows; j++) {
+//                        if (matches[j].distance <= max(2 * min_dist, 40.0)) {
+//                            good_matches.push_back(matches[j]);
+//                        }
+//                    }
+//                        num_match.push_back(matches.size());
+
+//                    catch (...) {
+//                        ROS_INFO("match error");
+
+
+
+
+//                    ROS_INFO_STREAM("The size of num_match:" << num_match.size() << endl);
+//
+//
+
+//
+//                auto biggest_num = std::max_element(std::begin(num_match), std::end(num_match));
+//
+//                if (*biggest_num > 400) {
+//                    // 匹配到或者在ORB_vt_set找到匹配到的id
+//                    current_vt = biggest_num - num_match.begin();
+//                    ROS_INFO_STREAM("big_id="<<current_vt<<endl);
+//                    ROS_INFO_STREAM("The size of descriptor_pool:" << descriptor_pool.size() << endl);
+//                } else {
+//                    //没匹配到创建新的ORB_vt到ORB_vt_set,
+//                    keyPoint_pool.push_back(keypoints);
+//                    descriptor_pool.push_back(descriptors);
+//                    current_vt = descriptor_pool.size() - 1;
+//                }
+//                vt_relative_rad = 0;
+//                ROS_INFO_STREAM("激活的id:current_vt = " << current_vt << endl);
+//                ROS_INFO_STREAM("The size of descriptor_pool:" << descriptor_pool.size() << endl);
+
+//
+//            }
+
 
 
 //
@@ -196,7 +218,7 @@ namespace ratslam {
 //        vt_relative_rad = 0;
 
 
-    }
+
 
 
 
@@ -537,4 +559,3 @@ namespace ratslam {
 //        }
 //    }
 //
-}

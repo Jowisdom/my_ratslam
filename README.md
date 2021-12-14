@@ -9,10 +9,12 @@ There is an openRatSLAM paper available in <a href='http://www.springerlink.com/
 The C++ RatSLAM implementation is currently being used to power the iRat robot when it is <a href='http://ratslam.itee.uq.edu.au/live.html'>online</a> and in recent ports of the <a href='http://itee.uq.edu.au/~ruth/Lingodroids.htm'>Lingodroids project</a> to use the iRat.<br>
 <br>
 There are now two versions of RatSLAM available, both based on the same code:<br>
+
 <ul><li><b>(NEW)</b> <a href='https://github.com/davidmball/ratslam/blob/wiki/RatSLAMROS.md'>A ROS-based version</a>
 </li><li><a href='https://github.com/davidmball/ratslam/blob/wiki/RatSLAMLibrary.md'>A C++ library</a></li></ul>
 
 We provide three datasets for the ROS version of openRatSLAM available at <a href='https://wiki.qut.edu.au/display/cyphy/openRatSLAM+datasets'>QUT cyphy</a> for:<br>
+
 <ul><li>iRat in an Australian set (2011)<br>
 </li><li>Car in St Lucia suburb (2007)<br>
 </li><li>Oxford's New College (2008)</li></ul>
