@@ -58,8 +58,8 @@ void odo_callback(nav_msgs::OdometryConstPtr odo, ratslam::PosecellNetwork *pc, 
     ROS_DEBUG_STREAM(
             "PC:odo_callback{" << ros::Time::now() << "} seq=" << odo->header.seq << " v=" << odo->twist.twist.linear.x
                                << " r=" << odo->twist.twist.angular.z);
-//    static ros::Time prev_time(0);
-    static ros::Time prev_time(ros::Time::now()); //将0反变换为时间戳
+    //You can also see we specified a time equal to 0. For tf, time 0 means "the latest available" transform in the buffer
+    static ros::Time prev_time(0);
 
     if (prev_time.toSec() > 0) {
         double time_diff = (odo->header.stamp - prev_time).toSec();
