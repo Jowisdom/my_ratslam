@@ -25,6 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #include <iostream>
 
 using namespace std;
@@ -58,11 +59,12 @@ void odo_callback(nav_msgs::OdometryConstPtr odo, ratslam::PosecellNetwork *pc, 
     ROS_DEBUG_STREAM(
             "PC:odo_callback{" << ros::Time::now() << "} seq=" << odo->header.seq << " v=" << odo->twist.twist.linear.x
                                << " r=" << odo->twist.twist.angular.z);
-//    static ros::Time prev_time(0);
-    static ros::Time prev_time(ros::Time::now()); //将0反变换为时间戳
+    //You can also see we specified a time equal to 0. For tf, time 0 means "the latest available" transform in the buffer
+    static ros::Time prev_time(0);
+//    static ros::Time prev_time(ros::Time::now()); //define time now
 
     if (prev_time.toSec() > 0) {
-        double time_diff = (odo->header.stamp - prev_time).toSec();
+        double time_diff = (odo->header.stamp - prev_time).toSec(); //toSec() tranforms the time stamp to float number.
 
         pc_output.src_id = pc->get_current_exp_id();
         pc->on_odo(odo->twist.twist.linear.x, odo->twist.twist.angular.z, time_diff);
@@ -137,6 +139,7 @@ int main(int argc, char *argv[]) {
     ros::Publisher pub_pc = node.advertise<ratslam_ros::TopologicalAction>(topic_root + "/PoseCell/TopologicalAction",
                                                                            0);
 
+
     ros::Subscriber sub_odometry = node.subscribe<nav_msgs::Odometry>(topic_root + "/odom", 0,
                                                                       boost::bind(odo_callback, _1, pc, &pub_pc),
                                                                       ros::VoidConstPtr(),
@@ -146,6 +149,7 @@ int main(int argc, char *argv[]) {
                                                                                          &pub_pc),
                                                                              ros::VoidConstPtr(),
                                                                              ros::TransportHints().tcpNoDelay());
+
 #ifdef HAVE_IRRLICHT
     boost::property_tree::ptree draw_settings;
     get_setting_child(draw_settings, settings, "draw", true);
