@@ -828,25 +828,15 @@ namespace ratslam {
         pcvt->exps.push_back(current_exp);
     }
 
+
+
+
     PosecellNetwork::PosecellAction PosecellNetwork::get_action() {
         PosecellExperience *experience;
         double delta_pc;
         PosecellAction action = NO_ACTION;
 
-        //如果检测到更新了里程计和PoseCellVisualTemplate,则让其flag重置，若没有更新，则输出NO_ACTION
-        /* 分为4种情况：
-         * 1、vt_update=true,odo_update=false: 创建新的VisualTemplate,PoseCellVisualTemplate,PoseCellExperience，初始化时
-         * 2、vt_update=false,odo_update=true: 在同一PoseCellVisualTemplate下，创建多个experiences,类似于走直线
-         * 3、vt_update=true,odo_update=true: 行走过程中或遇到相似场景，创建link和node
-         * 4、vt_update=false,odo_update=false：静止时
-         * 总结，就是vt_update更新，就是遇到新的场景或者熟悉的场景，
-         * 遇到新的场景则创建新的VisualTemplate,PoseCellVisualTemplate,PoseCellExperience，创建node
-         * 遇到熟悉的场景则注入能量在同一PoseCellVisualTemplate下，创建多个PoseCellExperience，和创建link
-         *
-         * odo_update要不静止，要不运动
-         * */
-
-        //排除第四种情况
+        //
         if (odo_update && vt_update) {
             odo_update = false;
             vt_update = false;
@@ -901,7 +891,7 @@ namespace ratslam {
                 }
 
                 // if an experience is closer than the thres create a link
-                // 如果距离非常近，则将这两个experience连起来
+                // two experience is the same one.
                 if (min_delta < EXP_DELTA_PC_THRESHOLD) {
                     matched_exp_id = min_delta_id;
                     action = CREATE_EDGE;
@@ -912,8 +902,8 @@ namespace ratslam {
                 //      要是距离很近,则让该节点等于匹配到的节点
                 //如果当前节点没匹配到，且其视图模板没变，说明是同一视图模板下的不同节点
                 //      创建新的experience和CREATE_NODE
-                if (current_exp != (unsigned) matched_exp_id) {
-                    if (matched_exp_id == -1) {
+                if (current_exp != (unsigned) matched_exp_id) {//avoid matching itself
+                    if (matched_exp_id == -1) {//can not find the match exp, create new exp node
                         create_experience();
                         action = CREATE_NODE;
                     } else {
@@ -922,7 +912,7 @@ namespace ratslam {
                             action = SET_NODE;
                         }
                     }
-                } else if (current_vt == prev_vt) {
+                } else if (current_vt == prev_vt) {//the robot moves slightly
                     create_experience();
                     action = CREATE_NODE;
                 }
@@ -932,6 +922,13 @@ namespace ratslam {
         return action;
     }
 
+
+    /* spread the energy and normalization the whole pose cell network.
+     * then,
+     * use the odometry informations for path integration by shifting the pose cell energy.
+     * finally,
+     * find the centroid of the dominant activity packet in the network
+     * */
     void PosecellNetwork::on_odo(double vtrans, double vrot, double time_diff_s) {
         vtrans = vtrans * time_diff_s;
         vrot = vrot * time_diff_s;
@@ -955,7 +952,8 @@ namespace ratslam {
         pcvt->decay = VT_ACTIVE_DECAY;
     }
 
-/* 该函数主要是local_view_cell接受刺激，并将刺激能量注入到pose_cell网络中
+/* when the vt is a new template: create new pvt, and activate the id of this new pvt.
+ * when the vt is matched: find the accordance pvt, inject the energy into this pvt.
  * input:
  *      vt: 当前激活的模板id
  *      vt_rad: relative_rad,在全景照片中根据图像计算出的relative_rad
