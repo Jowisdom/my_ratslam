@@ -68,6 +68,7 @@ void odo_callback(nav_msgs::OdometryConstPtr odo, ratslam::ExperienceMap *em) {
 
     static ros::Time prev_time(ros::Time::now());
 
+    //计算里程信息
     if (prev_time.toSec() > 0) {
         double time_diff = (odo->header.stamp - prev_time).toSec();
         em->on_odo(odo->twist.twist.linear.x, odo->twist.twist.angular.z, time_diff);

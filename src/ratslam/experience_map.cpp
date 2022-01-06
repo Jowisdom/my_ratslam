@@ -126,24 +126,27 @@ bool ExperienceMap::iterate()
   {
     for (exp_id = 0; exp_id < experiences.size(); exp_id++)
     {
-      link_from = &experiences[exp_id];
+      link_from = &experiences[exp_id]; //e0
 
       for (link_id = 0; link_id < link_from->links_from.size(); link_id++)
       {
         //%             //% experience 0 has a link to experience 1
-        link = &links[link_from->links_from[link_id]];
-        link_to = &experiences[link->exp_to_id];
+        link = &links[link_from->links_from[link_id]]; //e0→e1的link
+        link_to = &experiences[link->exp_to_id]; //e1
 
         //%             //% work out where e0 thinks e1 (x,y) should be based on the stored
         //%             //% link information
+        //根据e0和link估计e1的位置
         lx = link_from->x_m + link->d * cos(link_from->th_rad + link->heading_rad);
         ly = link_from->y_m + link->d * sin(link_from->th_rad + link->heading_rad);
 
         //%             //% correct e0 and e1 (x,y) by equal but opposite amounts
         //%             //% a 0.5 correction parameter means that e0 and e1 will be fully
         //%             //% corrected based on e0's link information
+        // 修正link_from的位置根据其指向的节点
         link_from->x_m += (link_to->x_m - lx) * EXP_CORRECTION;
         link_from->y_m += (link_to->y_m - ly) * EXP_CORRECTION;
+        // 修正link_from指向的节点link_to的位置
         link_to->x_m -= (link_to->x_m - lx) * EXP_CORRECTION;
         link_to->y_m -= (link_to->y_m - ly) * EXP_CORRECTION;
 
