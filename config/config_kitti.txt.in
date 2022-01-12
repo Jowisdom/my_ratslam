@@ -1,0 +1,33 @@
+[general]
+topic_root=test
+
+[ratslam]
+image_crop_x_min=200
+image_crop_x_max=1100
+image_crop_y_min=50
+image_crop_y_max=350
+vt_match_threshold = 0.1
+template_x_size=60
+template_y_size=20
+vt_shift_match = 4
+vt_step_match = 1
+vt_normalisation = 0.4
+pc_vt_restore=0.04
+
+pc_cell_x_size = 2
+pc_dim_xy = 30
+exp_delta_pc_threshold = 1.0
+pc_vt_inject_energy = 0.15
+vt_active_decay = 1.0
+
+exp_loops=20
+
+
+[draw]
+enable=1
+vt_window_width=900
+vt_window_height=300
+exp_map_size=500
+posecells_size=250
+media_path=@MEDIA_PATH@
+image_file=irat_sm.tga

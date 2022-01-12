@@ -76,6 +76,7 @@ void image_callback(sensor_msgs::ImageConstPtr image, ros::Publisher *pub_vt) {
      * 3、并池化为指定大小的view_image,
      * 4、global normalization and patch normalization
      * 5、然后与存储的template对比，返回匹配到的模板id或新建立的模板id*/
+    int size_image_raw=image->data.size();
     lv->on_image(&image->data[0], (image->encoding == "bgr8" ? false : true), image->width, image->height);
 
     vt_output.header.stamp = ros::Time::now();
@@ -84,7 +85,7 @@ void image_callback(sensor_msgs::ImageConstPtr image, ros::Publisher *pub_vt) {
     vt_output.relative_rad = lv->get_relative_rad(); //得到模板对应的角度
 
     pub_vt->publish(vt_output); //发布消息
-
+//    ROS_INFO_STREAM("recied the images");
 #ifdef HAVE_IRRLICHT
     if (use_graphics) {
         lvs->draw_all();

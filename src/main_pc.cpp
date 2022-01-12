@@ -90,6 +90,7 @@ void odo_callback(nav_msgs::OdometryConstPtr odo, ratslam::PosecellNetwork *pc, 
     prev_time = odo->header.stamp;
 }
 
+
 //根据激活的local_view_cell的id向对应的pose_cell插入刺激
 void template_callback(ratslam_ros::ViewTemplateConstPtr vt, ratslam::PosecellNetwork *pc, ros::Publisher *pub_pc) {
     ROS_DEBUG_STREAM(

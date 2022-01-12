@@ -179,7 +179,7 @@ namespace ratslam {
                     // block中像素累加，池化，block_size表示池化核的size
                     for (int x = x_block; x < (x_block + x_block_size); x++) {
                         for (int y = y_block; y < (y_block + y_block_size); y++) {
-                            //计算在block中的像素在原图片中的坐标，view_rgb为按一维矩阵排列，所以（x,y) = (x + y * IMAGE_WIDTH) * 3
+                            //计算在block中的像素在原图片中数组中的位置(坐标)，view_rgb为按一维矩阵排列，所以（x,y) = (x + y * IMAGE_WIDTH) * 3
                             pos = (x + y * IMAGE_WIDTH) * 3;
                             //将RGB像素值累加并保存到current_view到转为灰度图
                             current_view[data_next] += ((double) (view_rgb[pos]) + (double) (view_rgb[pos + 1])

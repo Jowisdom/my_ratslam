@@ -1,14 +1,32 @@
 <launch>
 
-<machine name="local_alt" address="localhost" default="true" />
+    <machine name="local_alt" address="localhost" default="true"/>
 
-<node name="RatSLAMLocalViewCells" pkg="ratslam_ros" type="ratslam_lv" args="$(find ratslam_ros)/config/config_test.txt _image_transport:=compressed" cwd="node" required="true" />
-<node name="RatSLAMPoseCells" pkg="ratslam_ros" type="ratslam_pc" args="$(find ratslam_ros)/config/config_test.txt _image_transport:=compressed" cwd="node" required="true" />
-<node name="RatSLAMExperienceMap" pkg="ratslam_ros" type="ratslam_em" args="$(find ratslam_ros)/config/config_test.txt _image_transport:=compressed" cwd="node" required="true" />
-<node pkg="image_converter" type="image_converter_node" name="image_converter_node" args="" output="screen">
-    <remap from="/camera/image_raw" to="/kitti/camera_color_left/image_raw"/>
-    <remap from="/image_converter/output_video" to="/test/camera/image/"/>
-
-</node>
+    <node name="RatSLAMLocalViewCells"
+          pkg="ratslam_ros"
+          type="ratslam_lv"
+          args="$(find ratslam_ros)/config/config_kitti.txt _image_transport:=compressed"
+          cwd="node"
+          required="true"/>
+<!--    <node name="RatSLAMPoseCells"-->
+<!--          pkg="ratslam_ros"-->
+<!--          type="ratslam_pc"-->
+<!--          args="$(find ratslam_ros)/config/config_test.txt _image_transport:=compressed"-->
+<!--          cwd="node"-->
+<!--          required="true"/>-->
+<!--    <node name="RatSLAMExperienceMap"-->
+<!--          pkg="ratslam_ros"-->
+<!--          type="ratslam_em"-->
+<!--          args="$(find ratslam_ros)/config/config_test.txt _image_transport:=compressed"-->
+<!--          cwd="node"-->
+<!--          required="true"/>-->
+    <node pkg="image_converter"
+          type="image_converter_node"
+          name="image_converter_node"
+          args=""
+          output="screen">
+        <remap from="/camera/image_raw" to="/kitti/camera_color_left/image_raw"/>
+        <remap from="/image_converter/output_video" to="/test/camera/image/"/>
+    </node>
 
 </launch>
