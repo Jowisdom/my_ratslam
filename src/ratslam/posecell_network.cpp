@@ -829,8 +829,6 @@ namespace ratslam {
     }
 
 
-
-
     PosecellNetwork::PosecellAction PosecellNetwork::get_action() {
         PosecellExperience *experience;
         double delta_pc;
