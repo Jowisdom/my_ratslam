@@ -121,6 +121,67 @@ void odo_callback(nav_msgs::OdometryConstPtr odo, ratslam::ExperienceMap *em) {
     prev_time = odo->header.stamp;
 }
 
+void odo_callback_kitti(geometry_msgs::TwistStampedConstPtr odo, ratslam::ExperienceMap *em) {
+    ROS_DEBUG_STREAM(
+            "EM:odo_callback{" << ros::Time::now() << "} seq=" << odo->header.seq << " v=" << odo->twist.linear.x
+                               << " r=" << odo->twist.angular.z);
+
+    static ros::Time prev_time(ros::Time::now());
+
+    if (prev_time.toSec() > 0) {
+        double time_diff = (odo->header.stamp - prev_time).toSec();
+        em->on_odo(odo->twist.linear.x, odo->twist.angular.z, time_diff);
+    }
+
+    static ros::Time prev_goal_update(0);
+
+    if (em->get_current_goal_id() >= 0) {
+        // (prev_goal_update.toSec() == 0 || (odo->header.stamp - prev_goal_update).toSec() > 5)
+        //em->calculate_path_to_goal(odo->header.stamp.toSec());
+
+        prev_goal_update = odo->header.stamp;
+
+        em->calculate_path_to_goal(odo->header.stamp.toSec());
+
+        static nav_msgs::Path path;
+        if (em->get_current_goal_id() >= 0) {
+            em->get_goal_waypoint();
+
+            static geometry_msgs::PoseStamped pose;
+            path.header.stamp = ros::Time::now();
+            path.header.frame_id = "1";
+
+            pose.header.seq = 0;
+            pose.header.frame_id = "1";
+            path.poses.clear();
+            unsigned int trace_exp_id = em->get_goals()[0];
+            while (trace_exp_id != em->get_goal_path_final_exp()) {
+                pose.pose.position.x = em->get_experience(trace_exp_id)->x_m;
+                pose.pose.position.y = em->get_experience(trace_exp_id)->y_m;
+                path.poses.push_back(pose);
+                pose.header.seq++;
+
+                trace_exp_id = em->get_experience(trace_exp_id)->goal_to_current;
+            }
+
+            pub_goal_path.publish(path);
+
+            path.header.seq++;
+
+        } else {
+            path.header.stamp = ros::Time::now();
+            path.header.frame_id = "1";
+            path.poses.clear();
+            pub_goal_path.publish(path);
+
+            path.header.seq++;
+        }
+    }
+
+    prev_time = odo->header.stamp;
+}
+
+
 void action_callback(ratslam_ros::TopologicalActionConstPtr action, ratslam::ExperienceMap *em) {
     ROS_DEBUG_STREAM(
             "EM:action_callback{" << ros::Time::now() << "} action=" << action->action << " src=" << action->src_id
@@ -262,7 +323,10 @@ int main(int argc, char *argv[]) {
     pub_pose = node.advertise<geometry_msgs::PoseStamped>(topic_root + "/ExperienceMap/RobotPose", 1);
 
     pub_goal_path = node.advertise<nav_msgs::Path>(topic_root + "/ExperienceMap/PathToGoal", 1);
-
+    ros::Subscriber sub_odometry_kitti = node.subscribe<geometry_msgs::TwistStamped>(topic_root + "/oxts/gps/vel", 0,
+                                                                                     boost::bind(odo_callback_kitti, _1, em),
+                                                                                     ros::VoidConstPtr(),
+                                                                                     ros::TransportHints().tcpNoDelay());
     ros::Subscriber sub_odometry = node.subscribe<nav_msgs::Odometry>(topic_root + "/odom", 0,
                                                                       boost::bind(odo_callback, _1, em),
                                                                       ros::VoidConstPtr(),

@@ -177,17 +177,20 @@ int main(int argc, char *argv[]) {
     ros::Publisher pub_pc = node.advertise<ratslam_ros::TopologicalAction>(topic_root + "/PoseCell/TopologicalAction",
                                                                            0);
 
-    if(topic_root == "kitti") {
-        ros::Subscriber sub_odometry = node.subscribe<geometry_msgs::TwistStamped>(topic_root + "/oxts/gps/vel", 0,
+//    if(topic_root.compare("kitti") == 0) {
+
+
+
+        ros::Subscriber sub_odometry_kitti = node.subscribe<geometry_msgs::TwistStamped>(topic_root + "/oxts/gps/vel", 0,
                                                                           boost::bind(odo_callback_kitti, _1, pc, &pub_pc),
                                                                           ros::VoidConstPtr(),
                                                                           ros::TransportHints().tcpNoDelay());
-    }else{
+//    }else{
         ros::Subscriber sub_odometry = node.subscribe<nav_msgs::Odometry>(topic_root + "/odom", 0,
                                                                           boost::bind(odo_callback, _1, pc, &pub_pc),
                                                                           ros::VoidConstPtr(),
                                                                           ros::TransportHints().tcpNoDelay());
-    }
+//    }
 
     ros::Subscriber sub_template = node.subscribe<ratslam_ros::ViewTemplate>(topic_root + "/LocalView/Template", 0,
                                                                              boost::bind(template_callback, _1, pc,
