@@ -11,7 +11,7 @@
 <!--    <node name="RatSLAMPoseCells"-->
 <!--          pkg="ratslam_ros"-->
 <!--          type="ratslam_pc"-->
-<!--          args="$(find ratslam_ros)/config/config_test.txt _image_transport:=compressed"-->
+<!--          args="$(find ratslam_ros)/config/config_kitti.txt _image_transport:=compressed"-->
 <!--          cwd="node"-->
 <!--          required="true"/>-->
 <!--    <node name="RatSLAMExperienceMap"-->
@@ -26,7 +26,8 @@
           args=""
           output="screen">
         <remap from="/camera/image_raw" to="/kitti/camera_color_left/image_raw"/>
-        <remap from="/image_converter/output_video" to="/test/camera/image/"/>
+        <remap from="/image_converter/output_video" to="/kitti/camera/image/"/>
     </node>
+
 
 </launch>

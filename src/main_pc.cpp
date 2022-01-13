@@ -40,6 +40,7 @@ using namespace std;
 #include <ratslam_ros/TopologicalAction.h>
 #include <nav_msgs/Odometry.h>
 #include <ratslam_ros/ViewTemplate.h>
+#include <geometry_msgs/TwistStamped.h>
 
 
 #if HAVE_IRRLICHT
@@ -68,6 +69,42 @@ void odo_callback(nav_msgs::OdometryConstPtr odo, ratslam::PosecellNetwork *pc, 
 
         pc_output.src_id = pc->get_current_exp_id();
         pc->on_odo(odo->twist.twist.linear.x, odo->twist.twist.angular.z, time_diff);
+        pc_output.action = pc->get_action();
+        if (pc_output.action != ratslam::PosecellNetwork::NO_ACTION) {
+            pc_output.header.stamp = ros::Time::now();
+            pc_output.header.seq++;
+            pc_output.dest_id = pc->get_current_exp_id();
+            pc_output.relative_rad = pc->get_relative_rad();
+            pub_pc->publish(pc_output);
+            ROS_DEBUG_STREAM(
+                    "PC:action_publish{odo}{" << ros::Time::now() << "} action{" << pc_output.header.seq << "}="
+                                              << pc_output.action << " src=" << pc_output.src_id << " dest="
+                                              << pc_output.dest_id);
+        }
+
+
+#ifdef HAVE_IRRLICHT
+        if (use_graphics) {
+            pcs->update_scene();
+            pcs->draw_all();
+        }
+#endif
+    }
+    prev_time = odo->header.stamp;
+}
+void odo_callback_kitti(geometry_msgs::TwistStampedConstPtr odo, ratslam::PosecellNetwork *pc, ros::Publisher *pub_pc) {
+    ROS_DEBUG_STREAM(
+            "PC:odo_callback{" << ros::Time::now() << "} seq=" << odo->header.seq << " v=" << odo->twist.linear.x
+                               << " r=" << odo->twist.angular.z);
+    //You can also see we specified a time equal to 0. For tf, time 0 means "the latest available" transform in the buffer
+    static ros::Time prev_time(0);
+//    static ros::Time prev_time(ros::Time::now()); //define time now
+
+    if (prev_time.toSec() > 0) {
+        double time_diff = (odo->header.stamp - prev_time).toSec(); //toSec() tranforms the time stamp to float number.
+
+        pc_output.src_id = pc->get_current_exp_id();
+        pc->on_odo(odo->twist.linear.x, odo->twist.angular.z, time_diff);
         pc_output.action = pc->get_action();
         if (pc_output.action != ratslam::PosecellNetwork::NO_ACTION) {
             pc_output.header.stamp = ros::Time::now();
@@ -140,11 +177,18 @@ int main(int argc, char *argv[]) {
     ros::Publisher pub_pc = node.advertise<ratslam_ros::TopologicalAction>(topic_root + "/PoseCell/TopologicalAction",
                                                                            0);
 
+    if(topic_root == "kitti") {
+        ros::Subscriber sub_odometry = node.subscribe<geometry_msgs::TwistStamped>(topic_root + "/oxts/gps/vel", 0,
+                                                                          boost::bind(odo_callback_kitti, _1, pc, &pub_pc),
+                                                                          ros::VoidConstPtr(),
+                                                                          ros::TransportHints().tcpNoDelay());
+    }else{
+        ros::Subscriber sub_odometry = node.subscribe<nav_msgs::Odometry>(topic_root + "/odom", 0,
+                                                                          boost::bind(odo_callback, _1, pc, &pub_pc),
+                                                                          ros::VoidConstPtr(),
+                                                                          ros::TransportHints().tcpNoDelay());
+    }
 
-    ros::Subscriber sub_odometry = node.subscribe<nav_msgs::Odometry>(topic_root + "/odom", 0,
-                                                                      boost::bind(odo_callback, _1, pc, &pub_pc),
-                                                                      ros::VoidConstPtr(),
-                                                                      ros::TransportHints().tcpNoDelay());
     ros::Subscriber sub_template = node.subscribe<ratslam_ros::ViewTemplate>(topic_root + "/LocalView/Template", 0,
                                                                              boost::bind(template_callback, _1, pc,
                                                                                          &pub_pc),

@@ -1,5 +1,5 @@
 [general]
-topic_root=test
+topic_root=kitti
 
 [ratslam]
 image_crop_x_min=200

@@ -32,7 +32,7 @@ using namespace std;
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui.hpp>
-
+#include <cv_bridge/cv_bridge.h>
 #include "utils/utils.h"
 
 #include <boost/property_tree/ini_parser.hpp>
@@ -44,6 +44,7 @@ using namespace std;
 #include <ros/console.h>
 
 #include <image_transport/image_transport.h>
+
 
 #include "ratslam/local_view_match.h"
 
@@ -76,8 +77,19 @@ void image_callback(sensor_msgs::ImageConstPtr image, ros::Publisher *pub_vt) {
      * 3、并池化为指定大小的view_image,
      * 4、global normalization and patch normalization
      * 5、然后与存储的template对比，返回匹配到的模板id或新建立的模板id*/
-    int size_image_raw=image->data.size();
+    cv::Mat img;
+    try {
+        //将ros::msg转化为cv::mat
+        img = cv_bridge::toCvShare(image, "mono8")->image;
+    } catch (...) {
+        ROS_ERROR("Could not convert from '%s' to 'mono8'.", image->encoding.c_str());
+        return;
+    }
+
+    cv::imshow("img_view", img);
+
     lv->on_image(&image->data[0], (image->encoding == "bgr8" ? false : true), image->width, image->height);
+    lv->plot_current_view();
 
     vt_output.header.stamp = ros::Time::now();
     vt_output.header.seq++;
@@ -86,11 +98,13 @@ void image_callback(sensor_msgs::ImageConstPtr image, ros::Publisher *pub_vt) {
 
     pub_vt->publish(vt_output); //发布消息
 //    ROS_INFO_STREAM("recied the images");
-#ifdef HAVE_IRRLICHT
-    if (use_graphics) {
-        lvs->draw_all();
-    }
-#endif
+//#ifdef HAVE_IRRLICHT
+//    if (use_graphics) {
+//        lvs->draw_all();
+//    }
+//#endif
+
+    cv::waitKey(1);
 }
 
 
@@ -146,13 +160,13 @@ int main(int argc, char *argv[]) {
     image_transport::Subscriber sub = it.subscribe(topic_root + "/camera/image", 1,
                                                    boost::bind(image_callback, _1, &pub_vt));
 
-#ifdef HAVE_IRRLICHT
-    boost::property_tree::ptree draw_settings;
-    get_setting_child(draw_settings, settings, "draw", true);
-    get_setting_from_ptree(use_graphics, draw_settings, "enable", true);
-    if (use_graphics)
-        lvs = new ratslam::LocalViewScene(draw_settings, lv);
-#endif
+//#ifdef HAVE_IRRLICHT
+//    boost::property_tree::ptree draw_settings;
+//    get_setting_child(draw_settings, settings, "draw", true);
+//    get_setting_from_ptree(use_graphics, draw_settings, "enable", true);
+//    if (use_graphics)
+//        lvs = new ratslam::LocalViewScene(draw_settings, lv);
+//#endif
 
 
     ros::spin();

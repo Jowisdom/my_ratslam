@@ -9,7 +9,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS message_generation std_msgs roscpp sensor_msgs nav_msgs tf visualization_msgs image_transport nav_msgs cv_bridge) ## actionlib_msgs)
 
-find_package(OpenCV)
+find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 find_package(Boost REQUIRED COMPONENTS serialization)
 find_package(Irrlicht REQUIRED)
@@ -64,7 +64,12 @@ include_directories(
 
 #ratslam library
 add_library(ratslam src/ratslam/experience_map.cpp src/ratslam/posecell_network.cpp src/ratslam/local_view_match.cpp src/ratslam/visual_odometry.cpp)
-
+target_link_libraries(ratslam
+        ${catkin_LIBRARIES}
+        ${OpenCV_LIBRARIES}
+        ${IRRLICHT_LIBRARIES}
+        ${OPENGL_LIBRARIES}
+        )
 
 # uncomment is you don't have irrlicht installed
 add_definitions("-DHAVE_IRRLICHT")

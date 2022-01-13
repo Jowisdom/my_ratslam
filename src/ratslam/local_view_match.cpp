@@ -39,6 +39,9 @@ using namespace std;
 
 #include <boost/foreach.hpp>
 #include <algorithm>
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <cv_bridge/cv_bridge.h>
 
 #include <stdio.h>
 
@@ -449,5 +452,21 @@ namespace ratslam {
 
         }
     }
+    void LocalViewMatch::plot_current_view(){
+        cv::Mat current_img = cv::Mat(current_view);
+        current_img = current_img.reshape(1,20).clone();
+        cv::namedWindow("current_view",cv::WindowFlags::WINDOW_GUI_NORMAL);
+        int window_height = IMAGE_VT_Y_RANGE_MAX - IMAGE_VT_Y_RANGE_MIN;
+        int window_width = IMAGE_VT_X_RANGE_MAX - IMAGE_VT_X_RANGE_MIN;
+        cv::resizeWindow("current_view",window_width,window_height);
+        cv::imshow("current_view",current_img);
+
+        cv::Mat match_img = cv::Mat(templates[current_vt].data);
+        match_img = match_img.reshape(1,20).clone();
+        cv::namedWindow("match_view",cv::WindowFlags::WINDOW_GUI_NORMAL);
+        cv::resizeWindow("match_view",window_width,window_height);
+        cv::imshow("match_view",match_img);
+    }
 
 }
+

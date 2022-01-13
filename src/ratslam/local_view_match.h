@@ -51,7 +51,9 @@ using boost::property_tree::ptree;
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/utility.hpp>
 #include <boost/serialization/vector.hpp>
-
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <cv_bridge/cv_bridge.h>
 namespace ratslam
 {
 
@@ -91,7 +93,7 @@ public:
   {
     return vt_relative_rad;
   }
-
+  void plot_current_view();
   template<typename Archive>
     void serialize(Archive& ar, const unsigned int version)
     {
