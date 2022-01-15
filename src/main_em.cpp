@@ -39,6 +39,7 @@
 #include <ratslam_ros/TopologicalMap.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <nav_msgs/Path.h>
+#include <sensor_msgs/NavSatFix.h>
 #include <tf/transform_broadcaster.h>
 
 #include <visualization_msgs/Marker.h>
@@ -293,6 +294,11 @@ void set_goal_pose_callback(geometry_msgs::PoseStampedConstPtr pose, ratslam::Ex
 
 }
 
+void set_goal_pose_callback_kitti(sensor_msgs::NavSatFixConstPtr pose, ratslam::ExperienceMap *em) {
+    em->add_goal(pose->latitude, pose->longitude);
+
+}
+
 int main(int argc, char *argv[]) {
     ROS_INFO_STREAM(argv[0] << " - openRatSLAM Copyright (C) 2012 David Ball and Scott Heath");
     ROS_INFO_STREAM("RatSLAM algorithm by Michael Milford and Gordon Wyeth");
@@ -323,6 +329,7 @@ int main(int argc, char *argv[]) {
     pub_pose = node.advertise<geometry_msgs::PoseStamped>(topic_root + "/ExperienceMap/RobotPose", 1);
 
     pub_goal_path = node.advertise<nav_msgs::Path>(topic_root + "/ExperienceMap/PathToGoal", 1);
+    //for kitti datasets
     ros::Subscriber sub_odometry_kitti = node.subscribe<geometry_msgs::TwistStamped>(topic_root + "/oxts/gps/vel", 0,
                                                                                      boost::bind(odo_callback_kitti, _1, em),
                                                                                      ros::VoidConstPtr(),
@@ -339,7 +346,10 @@ int main(int argc, char *argv[]) {
                                                                           boost::bind(set_goal_pose_callback, _1, em),
                                                                           ros::VoidConstPtr(),
                                                                           ros::TransportHints().tcpNoDelay());
-
+    ros::Subscriber sub_goal_kitti = node.subscribe<sensor_msgs::NavSatFix>(topic_root + "/oxts/gps/fix", 0,
+                                                                          boost::bind(set_goal_pose_callback_kitti, _1, em),
+                                                                          ros::VoidConstPtr(),
+                                                                          ros::TransportHints().tcpNoDelay());
 #ifdef HAVE_IRRLICHT
     boost::property_tree::ptree draw_settings;
     get_setting_child(draw_settings, settings, "draw", true);
